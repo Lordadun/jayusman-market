@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
@@ -13,12 +12,12 @@ class CategorySeeder extends Seeder
         $categories = [
             ['name' => 'Makanan', 'description' => 'Produk makanan ringan dan kebutuhan pangan'],
             ['name' => 'Minuman', 'description' => 'Produk minuman kemasan'],
-            ['name' => 'Kebutuhan Rumah Tangga', 'description' => 'Produk kebutuhan rumah'],
-            ['name' => 'Kebersihan', 'description' => 'Produk kebersihan'],
+            ['name' => 'Kebutuhan Rumah Tangga', 'description' => 'Produk kebutuhan rumah tangga'],
+            ['name' => 'Kebersihan', 'description' => 'Produk kebersihan dan sanitasi'],
         ];
 
         foreach ($categories as $category) {
-            Category::create($category);
+            Category::updateOrCreate(['name' => $category['name']], $category);
         }
     }
 }

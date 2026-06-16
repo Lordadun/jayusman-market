@@ -1,0 +1,10 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div><label class="block mb-1 font-medium">Nama</label><input name="name" value="{{ old('name', $user->name ?? '') }}" class="w-full border rounded-xl p-3" required></div>
+    <div><label class="block mb-1 font-medium">Email</label><input type="email" name="email" value="{{ old('email', $user->email ?? '') }}" class="w-full border rounded-xl p-3" required></div>
+    <div><label class="block mb-1 font-medium">Password {{ $user ? '(kosongkan jika tidak diganti)' : '' }}</label><input type="password" name="password" class="w-full border rounded-xl p-3" {{ $user ? '' : 'required' }}></div>
+    <div><label class="block mb-1 font-medium">Telepon</label><input name="phone" value="{{ old('phone', $user->phone ?? '') }}" class="w-full border rounded-xl p-3"></div>
+    <div><label class="block mb-1 font-medium">Role</label><select name="role" class="w-full border rounded-xl p-3" required>@foreach($roles as $role)<option value="{{ $role }}" @selected(old('role', $user->role ?? '') === $role)>{{ strtoupper($role) }}</option>@endforeach</select></div>
+    <div><label class="block mb-1 font-medium">Cabang</label><select name="branch_id" class="w-full border rounded-xl p-3"><option value="">Semua Cabang / Owner</option>@foreach($branches as $branch)<option value="{{ $branch->id }}" @selected(old('branch_id', $user->branch_id ?? '') == $branch->id)>{{ $branch->name }}</option>@endforeach</select></div>
+    <div><label class="block mb-1 font-medium">Status</label><select name="is_active" class="w-full border rounded-xl p-3"><option value="1" @selected(old('is_active', $user->is_active ?? 1) == 1)>Aktif</option><option value="0" @selected(old('is_active', $user->is_active ?? 1) == 0)>Nonaktif</option></select></div>
+</div>
+<div class="flex gap-2 mt-6"><button class="bg-blue-600 text-white px-4 py-2 rounded-xl">Simpan</button><a href="{{ route('users.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-xl">Kembali</a></div>

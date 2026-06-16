@@ -7,15 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'branch_id',
-        'category_id',
-        'code',
-        'name',
-        'stock',
-        'min_stock',
-        'purchase_price',
-        'selling_price',
-        'unit'
+        'branch_id', 'category_id', 'code', 'name', 'stock', 'min_stock',
+        'purchase_price', 'selling_price', 'unit',
     ];
 
     public function branch()

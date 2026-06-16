@@ -2,48 +2,30 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        User::create([
-            'name' => 'Pak Jayusman',
-            'email' => 'owner@jayusman.com',
-            'password' => Hash::make('password'),
-            'role' => 'owner',
-            'branch_id' => null,
-        ]);
+        $users = [
+            ['branch_id' => null, 'name' => 'Pak Jayusman', 'email' => 'owner@jayusman.com', 'role' => 'owner', 'phone' => '080000000000'],
+            ['branch_id' => 1, 'name' => 'Manajer Cianjur', 'email' => 'manager@jayusman.com', 'role' => 'manager', 'phone' => '081111111112'],
+            ['branch_id' => 1, 'name' => 'Supervisor Cianjur', 'email' => 'supervisor@jayusman.com', 'role' => 'supervisor', 'phone' => '081111111113'],
+            ['branch_id' => 1, 'name' => 'Kasir Cianjur', 'email' => 'kasir@jayusman.com', 'role' => 'cashier', 'phone' => '081111111114'],
+            ['branch_id' => 1, 'name' => 'Gudang Cianjur', 'email' => 'gudang@jayusman.com', 'role' => 'warehouse', 'phone' => '081111111115'],
+        ];
 
-        User::create([
-            'name' => 'Manajer Cianjur',
-            'email' => 'manager@jayusman.com',
-            'password' => Hash::make('password'),
-            'role' => 'manager',
-            'branch_id' => 1,
-        ]);
-
-        User::create([
-            'name' => 'Kasir Cianjur',
-            'email' => 'kasir@jayusman.com',
-            'password' => Hash::make('password'),
-            'role' => 'cashier',
-            'branch_id' => 1,
-        ]);
-
-        User::create([
-            'name' => 'Gudang Cianjur',
-            'email' => 'gudang@jayusman.com',
-            'password' => Hash::make('password'),
-            'role' => 'warehouse',
-            'branch_id' => 1,
-        ]);
+        foreach ($users as $user) {
+            User::updateOrCreate(
+                ['email' => $user['email']],
+                array_merge($user, [
+                    'password' => Hash::make('password'),
+                    'is_active' => true,
+                ])
+            );
+        }
     }
 }

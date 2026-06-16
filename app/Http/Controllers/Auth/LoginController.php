@@ -20,33 +20,25 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        $remember = $request->boolean('remember');
-
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
             if (!auth()->user()->is_active) {
                 Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Akun tidak aktif.',
-                ]);
+                return back()->withErrors(['email' => 'Akun tidak aktif.'])->onlyInput('email');
             }
 
             return redirect()->route('dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'Email atau password salah.'])->onlyInput('email');
     }
 
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect()->route('login');
     }
 }

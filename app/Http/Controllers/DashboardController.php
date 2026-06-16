@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -14,34 +13,32 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'owner') {
-            $totalBranches = Branch::count();
-            $totalProducts = Product::count();
-            $todayTransactions = Transaction::whereDate('transaction_date', today())->count();
-            $todayIncome = Transaction::whereDate('transaction_date', today())->sum('total_price');
-            $lowStocks = Product::whereColumn('stock', '<=', 'min_stock')->with('branch')->get();
-        } else {
-            $totalBranches = 1;
-            $totalProducts = Product::where('branch_id', $user->branch_id)->count();
-            $todayTransactions = Transaction::where('branch_id', $user->branch_id)
-                ->whereDate('transaction_date', today())
-                ->count();
+        $productQuery = Product::query();
+        $transactionQuery = Transaction::query();
+        $mutationQuery = StockMutation::query();
 
-            $todayIncome = Transaction::where('branch_id', $user->branch_id)
-                ->whereDate('transaction_date', today())
-                ->sum('total_price');
-
-            $lowStocks = Product::where('branch_id', $user->branch_id)
-                ->whereColumn('stock', '<=', 'min_stock')
-                ->get();
+        if ($user->role !== 'owner') {
+            $productQuery->where('branch_id', $user->branch_id);
+            $transactionQuery->where('branch_id', $user->branch_id);
+            $mutationQuery->where('branch_id', $user->branch_id);
         }
 
-        return view('dashboard', compact(
+        $totalBranches = $user->role === 'owner' ? Branch::count() : 1;
+        $totalProducts = (clone $productQuery)->count();
+        $todayTransactions = (clone $transactionQuery)->whereDate('transaction_date', today())->count();
+        $todayIncome = (clone $transactionQuery)->whereDate('transaction_date', today())->sum('total_price');
+        $lowStocks = (clone $productQuery)->with(['branch','category'])->whereColumn('stock', '<=', 'min_stock')->limit(10)->get();
+        $latestTransactions = (clone $transactionQuery)->with(['branch','cashier'])->latest()->limit(5)->get();
+        $latestMutations = (clone $mutationQuery)->with(['branch','product','user'])->latest()->limit(5)->get();
+
+        return view('dashboard.index', compact(
             'totalBranches',
             'totalProducts',
             'todayTransactions',
             'todayIncome',
-            'lowStocks'
+            'lowStocks',
+            'latestTransactions',
+            'latestMutations'
         ));
     }
 }

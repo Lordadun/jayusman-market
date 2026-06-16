@@ -7,14 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class StockMutation extends Model
 {
     protected $fillable = [
-        'branch_id',
-        'product_id',
-        'user_id',
-        'type',
-        'quantity',
-        'stock_before',
-        'stock_after',
-        'description',
+        'branch_id', 'product_id', 'user_id', 'type', 'quantity',
+        'stock_before', 'stock_after', 'description',
     ];
 
     public function branch()

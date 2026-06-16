@@ -7,13 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $fillable = [
-        'branch_id',
-        'user_id',
-        'invoice_number',
-        'total_price',
-        'paid_amount',
-        'change_amount',
-        'transaction_date'
+        'branch_id', 'user_id', 'invoice_number', 'total_price', 'paid_amount',
+        'change_amount', 'transaction_date',
     ];
 
     public function branch()

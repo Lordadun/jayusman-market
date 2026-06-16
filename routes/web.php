@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
@@ -11,12 +12,15 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-
-    return redirect()->route('login');
+    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+    Route::post('/login', [LoginController::class, 'login'])->name('login.process');
+});
+
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -30,11 +34,11 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:owner,manager,supervisor,warehouse'])->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
-        Route::resource('stock-mutations', StockMutationController::class);
+        Route::resource('stock-mutations', StockMutationController::class)->except(['show', 'edit', 'update']);
     });
 
     Route::middleware(['role:owner,manager,supervisor,cashier'])->group(function () {
-        Route::resource('transactions', TransactionController::class);
+        Route::resource('transactions', TransactionController::class)->except(['edit', 'update']);
     });
 
     Route::middleware(['role:owner,manager'])->group(function () {
@@ -44,6 +48,3 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reports/stocks/print', [ReportController::class, 'printStocks'])->name('reports.stocks.print');
     });
 });
-
-
-require __DIR__.'/auth.php';

@@ -2,63 +2,89 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $users = User::with('branch')->latest()->paginate(10);
+        return view('users.index', compact('users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $branches = Branch::orderBy('name')->get();
+        $roles = ['owner', 'manager', 'supervisor', 'cashier', 'warehouse'];
+        return view('users.create', compact('branches', 'roles'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'branch_id' => 'nullable|exists:branches,id',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role' => ['required', Rule::in(['owner', 'manager', 'supervisor', 'cashier', 'warehouse'])],
+            'phone' => 'nullable|string|max:30',
+            'is_active' => 'required|boolean',
+        ]);
+
+        $data = $request->only(['branch_id', 'name', 'email', 'role', 'phone', 'is_active']);
+        $data['branch_id'] = $request->role === 'owner' ? null : $request->branch_id;
+        $data['password'] = Hash::make($request->password);
+
+        User::create($data);
+        return redirect()->route('users.index')->with('success', 'Pengguna berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(User $user)
     {
-        //
+        return redirect()->route('users.edit', $user);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(User $user)
     {
-        //
+        $branches = Branch::orderBy('name')->get();
+        $roles = ['owner', 'manager', 'supervisor', 'cashier', 'warehouse'];
+        return view('users.edit', compact('user', 'branches', 'roles'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        $request->validate([
+            'branch_id' => 'nullable|exists:branches,id',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:6',
+            'role' => ['required', Rule::in(['owner', 'manager', 'supervisor', 'cashier', 'warehouse'])],
+            'phone' => 'nullable|string|max:30',
+            'is_active' => 'required|boolean',
+        ]);
+
+        $data = $request->only(['branch_id', 'name', 'email', 'role', 'phone', 'is_active']);
+        $data['branch_id'] = $request->role === 'owner' ? null : $request->branch_id;
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+        return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        if ($user->id === auth()->id()) {
+            return redirect()->route('users.index')->with('error', 'Akun yang sedang login tidak boleh dihapus.');
+        }
+
+        $user->delete();
+        return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 }
