@@ -10,6 +10,8 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\StockMutationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuditLogController;
+
 
 Route::get('/', function () {
     return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
@@ -47,4 +49,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reports/transactions/print', [ReportController::class, 'printTransactions'])->name('reports.transactions.print');
         Route::get('/reports/stocks/print', [ReportController::class, 'printStocks'])->name('reports.stocks.print');
     });
+
+    Route::middleware(['role:owner,manager'])->group(function () {
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+        });
+
 });
