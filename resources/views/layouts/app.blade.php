@@ -34,7 +34,10 @@
             @if(in_array(auth()->user()->role, ['owner','manager']))
                 <a href="{{ route('reports.transactions') }}" class="block px-4 py-3 rounded-xl hover:bg-slate-800">Laporan Transaksi</a>
                 <a href="{{ route('reports.stocks') }}" class="block px-4 py-3 rounded-xl hover:bg-slate-800">Laporan Stok</a>
-            @endif
+                @if(in_array(auth()->user()->role, ['owner','manager']))
+                <a href="{{ route('audit-logs.index') }}" class="block px-4 py-3 rounded hover:bg-slate-700"> Audit Log
+                </a>
+                @endif
         </nav>
     </aside>
 
