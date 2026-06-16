@@ -1,27 +1,65 @@
 <?php
-namespace App\Http\Controllers; use App\Models\AuditLog;
+
+namespace App\Http\Controllers;
+
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
 class AuditLogController extends Controller
 {
-public function index(Request $request)
-{
-$logs = AuditLog::with('user')
-->when($request->module, function ($query) use ($request) {
-$query->where('module', $request->module);
-})
-->when($request->action, function ($query) use ($request) {
-$query->where('action', $request->action);
-})
-->when($request->start_date, function ($query) use ($request) {
-$query->whereDate('created_at', '>=', $request->start_date);
-})
-->when($request->end_date, function ($query) use ($request) {
-$query->whereDate('created_at', '<=', $request->end_date);
-})
-->latest()
-->paginate(15);
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
 
-return view('audit_logs.index', compact('logs'));
-}
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(AuditLog $auditLog)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(AuditLog $auditLog)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, AuditLog $auditLog)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(AuditLog $auditLog)
+    {
+        //
+    }
 }
