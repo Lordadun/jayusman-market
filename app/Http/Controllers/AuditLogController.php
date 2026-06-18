@@ -12,7 +12,9 @@ class AuditLogController extends Controller
      */
     public function index()
     {
-        //
+         $logs = AuditLog::latest()->get();
+
+    return view('audit_logs.index', compact('logs'));
     }
 
     /**

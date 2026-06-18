@@ -49,12 +49,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reports/transactions/print', [ReportController::class, 'printTransactions'])->name('reports.transactions.print');
         Route::get('/reports/stocks/print', [ReportController::class, 'printStocks'])->name('reports.stocks.print');
     });
-    Route::middleware(['role:owner,manager'])->group(function () {
-Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])
+    ->name('audit-logs.index');
 });
 
 
     
 
     
-});
+ 
