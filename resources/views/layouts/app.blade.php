@@ -38,6 +38,7 @@
                 <a href="{{ route('audit-logs.index') }}" class="block px-4 py-3 rounded hover:bg-slate-700"> Audit Log
                 </a>
                 @endif
+            
         </nav>
     </aside>
 
@@ -69,7 +70,8 @@
                     </ul>
                 </div>
             @endif
-            @yield('content')
+          @yield('content')
+         
         </section>
     </main>
 </div>
