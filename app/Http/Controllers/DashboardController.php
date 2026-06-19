@@ -5,40 +5,69 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Transaction;
-use App\Models\StockMutation;
+use App\Models\TransactionDetail;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $user = auth()->user();
+ public function index()
+ {
+ $user = auth()->user();
+ if ($user->role === 'owner') {
+ $totalBranches = Branch::count();
+ $totalProducts = Product::count();
+ $todayTransactions = Transaction::whereDate('transaction_date', today())
+ ->count();
+ $todayIncome = Transaction::whereDate('transaction_date', today())
+ ->sum('total_price');
+ $lowStocks = Product::with('branch')
+ ->whereColumn('stock', '<=', 'min_stock')
+ ->get();
+ // Grafik pendapatan semua cabang untuk owner
+ $branchIncomes = Branch::withSum('transactions as total_income', 'total_price')
+ ->get();
+ } else {
+ $totalBranches = 1;
+ $totalProducts = Product::where('branch_id', $user->branch_id)
+ ->count();
+ $todayTransactions = Transaction::where('branch_id', $user->branch_id)
+ ->whereDate('transaction_date', today())
+ ->count();
+ $todayIncome = Transaction::where('branch_id', $user->branch_id)
+ ->whereDate('transaction_date', today())
+ ->sum('total_price');
+ $lowStocks = Product::with('branch')
+ ->where('branch_id', $user->branch_id)
+ ->whereColumn('stock', '<=', 'min_stock')
+ ->get();
+ // Selain owner hanya melihat pendapatan cabangnya sendiri
+ $branchIncomes = Branch::where('id', $user->branch_id)
+ ->withSum('transactions as total_income', 'total_price')
+ ->get();
+ }
 
-        $productQuery = Product::query();
-        $transactionQuery = Transaction::query();
-        $mutationQuery = StockMutation::query();
+ $bestSellingProducts = TransactionDetail::with('product')
+    ->select(
+        'product_id',
+        DB::raw('SUM(quantity) as total_sold'),
+        DB::raw('SUM(subtotal) as total_income')
+    )
+    ->groupBy('product_id')
+    ->orderByDesc('total_sold')
+    ->take(10)
+    ->get();
+ // Untuk menghitung panjang bar grafik
+ $maxIncome = $branchIncomes->max('total_income') ?: 1;
+ return view('dashboard', compact(
+    'totalBranches',
+    'totalProducts',
+    'todayTransactions',
+    'todayIncome',
+    'lowStocks',
+    'branchIncomes',
+    'maxIncome',
+    'bestSellingProducts'
+    ));
+ }
 
-        if ($user->role !== 'owner') {
-            $productQuery->where('branch_id', $user->branch_id);
-            $transactionQuery->where('branch_id', $user->branch_id);
-            $mutationQuery->where('branch_id', $user->branch_id);
-        }
-
-        $totalBranches = $user->role === 'owner' ? Branch::count() : 1;
-        $totalProducts = (clone $productQuery)->count();
-        $todayTransactions = (clone $transactionQuery)->whereDate('transaction_date', today())->count();
-        $todayIncome = (clone $transactionQuery)->whereDate('transaction_date', today())->sum('total_price');
-        $lowStocks = (clone $productQuery)->with(['branch','category'])->whereColumn('stock', '<=', 'min_stock')->limit(10)->get();
-        $latestTransactions = (clone $transactionQuery)->with(['branch','cashier'])->latest()->limit(5)->get();
-        $latestMutations = (clone $mutationQuery)->with(['branch','product','user'])->latest()->limit(5)->get();
-
-        return view('dashboard.index', compact(
-            'totalBranches',
-            'totalProducts',
-            'todayTransactions',
-            'todayIncome',
-            'lowStocks',
-            'latestTransactions',
-            'latestMutations'
-        ));
-    }
 }

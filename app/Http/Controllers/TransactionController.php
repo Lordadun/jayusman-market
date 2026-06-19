@@ -122,8 +122,8 @@ class TransactionController extends Controller
             return redirect()->route('transactions.show', $transaction)->with('success', 'Transaksi berhasil disimpan.');
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+            dd($e->getMessage());
+            }
     }
 
     public function show(Transaction $transaction)
@@ -135,6 +135,20 @@ class TransactionController extends Controller
 
         $transaction->load(['branch', 'cashier', 'details.product']);
         return view('transactions.show', compact('transaction'));
+    }
+
+    public function receipt(Transaction $transaction)
+    {
+        $user = auth()->user();
+        if ($user->role !== 'owner' && $transaction->branch_id !== $user->branch_id) {
+        abort(403, 'Akses ditolak.');
+        }
+        $transaction->load([
+        'branch',
+        'cashier',
+        'details.product'
+        ]);
+        return view('transactions.receipt', compact('transaction'));
     }
 
     public function destroy(Transaction $transaction)

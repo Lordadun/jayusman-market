@@ -40,8 +40,11 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:owner,manager,supervisor,cashier'])->group(function () {
-        Route::resource('transactions', TransactionController::class)->except(['edit', 'update']);
+        Route::get('/transactions/{transaction}/receipt', [TransactionController::class, 'receipt'])
+            ->name('transactions.receipt');
+        Route::resource('transactions', TransactionController::class);
     });
+
 
     Route::middleware(['role:owner,manager'])->group(function () {
         Route::get('/reports/transactions', [ReportController::class, 'transactions'])->name('reports.transactions');
