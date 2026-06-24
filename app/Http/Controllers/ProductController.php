@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Models\AuditLog;
 
 class ProductController extends Controller
 {
@@ -57,9 +58,15 @@ class ProductController extends Controller
             abort(403, 'Akses ditolak. Produk harus sesuai cabang Anda.');
         }
 
-        Product::create($request->only([
-            'branch_id', 'category_id', 'code', 'name', 'stock', 'min_stock', 'purchase_price', 'selling_price', 'unit'
-        ]));
+        $product = Product::create($request->all());
+        
+            AuditLog::record( 'create',
+            'Produk',
+            'Menambahkan produk baru: ' . $product->name, null,
+            $product->toArray()
+            );
+
+           
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
@@ -105,9 +112,17 @@ class ProductController extends Controller
             abort(403, 'Akses ditolak. Produk harus sesuai cabang Anda.');
         }
 
-        $product->update($request->only([
-            'branch_id', 'category_id', 'code', 'name', 'stock', 'min_stock', 'purchase_price', 'selling_price', 'unit'
-        ]));
+
+$oldData = $product->toArray();
+$product->update($request->all()); AuditLog::record(
+'update',
+'Produk',
+'Mengubah data produk: ' . $product->name,
+$oldData,
+ 
+$product->fresh()->toArray()
+);
+
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
     }
@@ -119,7 +134,12 @@ class ProductController extends Controller
             abort(403, 'Akses ditolak.');
         }
 
-        $product->delete();
-        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
+       AuditLog::record( 'delete',
+'Produk',
+'Menghapus produk: ' . $product->name,
+$product->toArray(), null
+);
+
+$product->delete(); 
     }
 }

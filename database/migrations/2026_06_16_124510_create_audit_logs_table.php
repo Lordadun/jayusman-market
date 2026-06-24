@@ -32,3 +32,4 @@ public function down(): void
 Schema::dropIfExists('audit_logs');
 }
 };
+ 
